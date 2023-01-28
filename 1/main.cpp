@@ -1,80 +1,69 @@
 #include <UnitTest++/UnitTest++.h>
-#include <iostream>
-#include "/home/stud/C++Projects/C++Projects/pract_1_2/Cipher.h"
-#include "/home/stud/C++Projects/C++Projects/pract_1_2/Cipher.cpp"
-#include <locale>
-#include <codecvt>
-
-
-using namespace std;
-string wst (int k, wstring s1)
+#include "/media/Общедоступные/Для ТИМПА 3/Task_1/modAlphaCipher.h"
+#include "/media/Общедоступные/Для ТИМПА 3/Task_1/modAlphaCipher.cpp"
+SUITE(KeyTest)
 {
-    Cipher w(k);
-    wstring s=w.Coder(w, s1);
-    const string s2 (s.begin(), s.end() );
-    return s2;
-}
-string wst1 (int k, wstring s1)
-{
-    Cipher w(k);
-    wstring s=w.Decoder(k, s1);
-    const string s2 (s.begin(), s.end() );
-    return s2;
-}
-    wstring test = L"HELLOPARNIDAROVA";
-    int k;
-    SUITE (ERRORS)
-{
+    TEST(ValidKey) {
+        CHECK_EQUAL("АМЦГЖИУ", modAlphaCipher("АЛФАВИТ").encrypt("АБВГД"));
+    }
+    TEST(LowCaseKey) {
+        CHECK_EQUAL("ПАВНЕБ", modAlphaCipher("ывиорт").encrypt("ГКИН"));
+    }
+    TEST(WhitespaceInKey) {
+        CHECK_THROW(modAlphaCipher key("Р Т"), cipher_error);
+    }
     TEST(EmptyKey) {
-        CHECK_THROW(wst(k=0,test), cipher_error);
-    }
-    TEST(NegativeKey) {
-        CHECK_THROW(wst(k=-5,test), cipher_error);
-    }
-    TEST(LargeKey) {
-        CHECK_THROW(wst(k=55,test), cipher_error);
-    }
-    TEST(EmptyText) {
-        CHECK_THROW(wst(8,L" "),cipher_error);
-    }
-    TEST(ValiDTextWithoutletters) {
-        CHECK_THROW(wst(8,L"/,.123"),cipher_error);
-    }
-    TEST(EmptyTEXT) {
-        CHECK_THROW(wst1(8,L" "),cipher_error);
+        CHECK_THROW(modAlphaCipher key(""), cipher_error);
     }
 }
-SUITE (PROVERKI)
+struct KeyB_fixture {
+    modAlphaCipher* p;
+    KeyB_fixture()
+    {
+        p = new modAlphaCipher("Б");
+    }
+    ~KeyB_fixture()
+    {
+        delete p;
+    }
+};
+SUITE(EncryptTest)
 {
-    TEST(ValidText) {
-        CHECK_EQUAL(wst(8,L"HELLOPARNIDAROVA"),"HNEILDLAORPOAVRA");
+    TEST_FIXTURE(KeyB_fixture, UpCaseString) {
+        CHECK_EQUAL("НБНЬМБСБНФ", p->encrypt("ЕРКЛЕЙДЖ"));
     }
-    TEST(LowText) {
-        CHECK_EQUAL(wst(8,L"HELLOparniDAROVA"),"HNEILDLAORPOAVRA");
+    TEST_FIXTURE(KeyB_fixture, LowCaseString) {
+        CHECK_EQUAL("НБНЬМБСБНФ", p->encrypt("ердилейдж"));
     }
-    TEST(SpaceText) {
-        CHECK_EQUAL(wst(8,L"HELLO PARNI DAROVA"),"HNEILDLAORPOAVRA");
+    TEST_FIXTURE(KeyB_fixture, NoAlphaString) {
+        CHECK_THROW(p->encrypt("1243"), cipher_error);
     }
-    TEST(TextWithNumber) {
-        CHECK_EQUAL(wst(8,L"HELLOPARNID123123AROVA"),"HNEILDLAORPOAVRA");
+}
+SUITE(DecryptText)
+{
+    TEST_FIXTURE(KeyB_fixture, LowCaseString) {
+        CHECK_THROW(p -> decrypt("нПРОБСБНФ"), cipher_error);
     }
-    TEST(ValidTEXTo) {
-        CHECK_EQUAL(wst1(8,L"HNEILDLAORPOAVRA"),"HELLOPARNIDAROVA");
-    }
-    TEST(LowTEXTo) {
-        CHECK_EQUAL(wst1(8,L"HNEILDlaorPOAVRA"),"HELLOPARNIDAROVA");
-    }
-    TEST(SpaceTEXTo) {
-        CHECK_EQUAL(wst1(8,L"HNEILDL AORPOAVRA"),"HELLOPARNIDAROVA");
-    }
-    TEST(TextNumberTexto) {
-        CHECK_EQUAL(wst1(8,L"HNEILDLA123ORPOAVRA"),"HELLOPARNIDAROVA");
-    }
-    TEST(TextSymbolTexto) {
-        CHECK_EQUAL(wst1(8,L"HNEILDLAOR..POAVRA"),"HELLOPARNIDAROVA");
+    TEST_FIXTURE(KeyB_fixture, EmptyString) {
+        CHECK_THROW(p->decrypt(""), cipher_error);
     }
 }
 int main(int argc, char **argv)
-{ 
+{
+    return UnitTest::RunAllTests();
+}
+struct KeyAB_fixture {
+    modAlphaCipher * pointer;
+    KeyAB_fixture()
+    {
+        pointer = new modAlphaCipher(L"АВ");
+    }
+    ~KeyAB_fixture()
+    {
+    delete pointer;
+    }
+};
+int main()
+{
     return UnitTest::RunAllTests();
 }
